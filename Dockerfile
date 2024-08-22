@@ -1,10 +1,10 @@
 FROM opensuse/tumbleweed:latest AS base
 
-ARG RELEASE
+ARG PROMETHEUS_VERSION
 
 RUN mkdir -p /opt/prometheus && \
     mkdir -p /etc/prometheus && \
-    curl -L https://github.com/prometheus/prometheus/releases/download/v$RELEASE/prometheus-$RELEASE.linux-$(uname -p | sed s/aarch64/arm64/ | sed s/x86_64/amd64/).tar.gz | tar --directory /opt/prometheus --strip-components 1 --wildcards -zxvf - *prometheus && \
+    curl -L https://github.com/prometheus/prometheus/releases/download/v$PROMETHEUS_VERSION/prometheus-$PROMETHEUS_VERSION.linux-$(uname -p | sed s/aarch64/arm64/ | sed s/x86_64/amd64/).tar.gz | tar --directory /opt/prometheus --strip-components 1 --wildcards -zxvf - *prometheus && \
     groupadd -g 9090 -r prometheus && useradd -u 9090 -d /tmp -g prometheus prometheus && \
     chown -R prometheus:prometheus /opt/prometheus && \
     chown -R prometheus:prometheus /etc/prometheus && \
