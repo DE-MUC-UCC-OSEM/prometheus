@@ -1,7 +1,15 @@
 FROM opensuse/tumbleweed:latest AS base
 
 ARG PROMETHEUS_VERSION
+ARG MEND_EMAIL
+ARG MEND_URL
+ARG MEND_USER_KEY
+RUN mkdir -p /tmp/prometheus && \
+    curl -L https://github.com/prometheus/prometheus/archive/refs/tags/v$PROMETHEUS_VERSION.tar.gz | tar --directory /tmp/prometheus --strip-components 1 -zxvf - && \
+    curl -L https://downloads.mend.io/cli/linux_amd64/mend -o /tmp/mend && chmod +x /tmp/mend && \
+    /tmp/mend dep --dir /tmp/prometheus --extended -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-sourcecode - $PROMETHEUS_VERSION-r$RELEASE_VERSION" -u
 
+ARG PROMETHEUS_VERSION
 RUN mkdir -p /opt/prometheus && \
     mkdir -p /etc/prometheus && \
     curl -L https://github.com/prometheus/prometheus/releases/download/v$PROMETHEUS_VERSION/prometheus-$PROMETHEUS_VERSION.linux-$(uname -p | sed s/aarch64/arm64/ | sed s/x86_64/amd64/).tar.gz | tar --directory /opt/prometheus --strip-components 1 --wildcards -zxvf - *prometheus && \
