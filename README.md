@@ -1,1 +1,17 @@
-# prometheus
+## Information
+Prometheus running in a minimal OpenSUSE Docker Image
+
+Using pre-built Promtheus executable version from Promtheus github project. Everything put into a minimal Container image built from an OpenSUSE tumbleweed image
+
+## Run the image
+
+You can run the image via Docker
+```
+docker run -dit ghcr.io/svenbeisiegel/prometheus:2.54.0-r0-tumbleweed
+```
+## Configuration
+
+A valid prometheus.yaml file must be mounted into the container.
+```
+-v /path/to/prometheus.yml:/etc/prometheus/prometheus.yml
+```
