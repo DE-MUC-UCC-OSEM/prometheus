@@ -1,7 +1,18 @@
-name: publish
+name: Build Docker Image
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        type: string
+        required: true
+        description: 'Internal release version counter'
+        default: '0'
+      prometheus:
+        type: string
+        required: true
+        description: 'Prometheus release version'
+        default: '2.54.0'
 
 jobs:
   push_to_registry:
@@ -9,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: versions
     permissions:
-      contents: read
+      contents: write
       packages: write
       attestations: write
       id-token: write
@@ -30,11 +41,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest
             type=raw,value=${{ vars.PROMETHEUS_VERSION }}-${{ vars.RELEASE_VERSION }}-tumbleweed
-
-      - name: Setup Docker Buildx environment
-        uses: docker/setup-buildx-action@v3
+            #type=raw,value=latest
       
       - name: Build and push Docker image
         id: push
@@ -42,14 +50,39 @@ jobs:
         with:
           context: .
           build-args: |
-            PROMETHEUS_VERSION=${{ vars.PROMETHEUS_VERSION }}
+            PROMETHEUS_VERSION=${{ github.event.inputs.prometheus }}
+            RELEASE_VERSION=${{ github.event.inputs.release }}
+            MEND_EMAIL=${{ secrets.MEND_EMAIL }}
+            MEND_URL=${{ secrets.MEND_URL }}
+            MEND_USER_KEY=${{ secrets.MEND_USER_KEY }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
+      - name: Scan Docker Image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
+          RELEASE_VERSION: ${{ github.event.inputs.release }}
+          MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
+          MEND_URL: ${{ secrets.MEND_URL }}
+          MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+        run: |
+          curl -L https://downloads.mend.io/cli/linux_amd64/mend -o /tmp/mend && chmod +x /tmp/mend && \
+          /tmp/mend image $IMAGE -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
+        working-directory: /tmp
+
+      - name: Create a Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          tag_name: ${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}
+          release_name: Prometheus ${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          body: |
+            Prometheus build details
+            - Prometheus: ${{ github.event.inputs.prometheus }}
+
+            docker run -dit ghcr.io/${{ github.repository }}:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          draft: false
+          prerelease: false
