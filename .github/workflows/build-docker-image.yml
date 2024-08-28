@@ -18,7 +18,6 @@ jobs:
   push_to_registry:
     name: Push image to Github container registry
     runs-on: ubuntu-latest
-    environment: versions
     permissions:
       contents: write
       packages: write
@@ -41,7 +40,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ vars.PROMETHEUS_VERSION }}-${{ vars.RELEASE_VERSION }}-tumbleweed
+            type=raw,value=${{ github.event.inputs.prometheus }}-${{ github.event.inputs.release }}-tumbleweed
             #type=raw,value=latest
       
       - name: Build and push Docker image
