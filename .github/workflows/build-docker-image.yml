@@ -40,7 +40,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ github.event.inputs.prometheus }}-${{ github.event.inputs.release }}-tumbleweed
+            type=raw,value=${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
             #type=raw,value=latest
       
       - name: Build and push Docker image
