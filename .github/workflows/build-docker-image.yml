@@ -68,20 +68,17 @@ jobs:
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
         run: |
           curl -L https://downloads.mend.io/cli/linux_amd64/mend -o /tmp/mend && chmod +x /tmp/mend && \
-          /tmp/mend image $IMAGE -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
+          /tmp/mend image ${IMAGE,,} -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
         working-directory: /tmp
 
-      - name: Create a Release
-        uses: actions/create-release@v1
+      - name: Create a release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}
-          release_name: Prometheus ${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
-          body: |
-            Prometheus build details
-            - Prometheus: ${{ github.event.inputs.prometheus }}
-
-            docker run -dit ghcr.io/${{ github.repository }}:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
-          draft: false
-          prerelease: false
+          PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
+          RELEASE_VERSION: ${{ github.event.inputs.release }}
+        run: |
+          echo -e "Prometheus build details\n- Prometheus: $PROMETHEUS_VERSION" > rn
+          gh release create "$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
+              --notes-file rn
