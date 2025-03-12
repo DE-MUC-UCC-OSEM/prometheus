@@ -8,7 +8,8 @@ ARG MEND_USER_KEY
 RUN mkdir -p /tmp/prometheus && \
     curl -L https://github.com/prometheus/prometheus/archive/refs/tags/v$PROMETHEUS_VERSION.tar.gz | tar --directory /tmp/prometheus --strip-components 1 -zxvf - && \
     curl -L https://downloads.mend.io/cli/linux_amd64/mend -o /tmp/mend && chmod +x /tmp/mend && \
-    /tmp/mend dep --dir /tmp/prometheus --extended -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-sourcecode - $PROMETHEUS_VERSION-r$RELEASE_VERSION" -u
+    /tmp/mend update && \
+    /tmp/mend dep -d "/tmp/prometheus" -e -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-sourcecode - $PROMETHEUS_VERSION-r$RELEASE_VERSION" -u --non-interactive
 
 ARG PROMETHEUS_VERSION
 RUN mkdir -p /opt/prometheus && \
