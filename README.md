@@ -9,7 +9,7 @@ Using pre-built Promtheus executable version from Promtheus github project. Ever
 
 You can run the image via Docker
 ```
-docker run -dit ghcr.io/de-muc-ucc-osem/prometheus:2.54.0-r0-tumbleweed
+docker run -dit ghcr.io/de-muc-ucc-osem/prometheus:3.3.1-r0-tumbleweed
 ```
 ## Configuration
 
