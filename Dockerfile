@@ -18,7 +18,7 @@ RUN mkdir -p /opt/prometheus && \
     groupadd -g 9090 -r prometheus && useradd -u 9090 -d /tmp -g prometheus prometheus && \
     chown -R prometheus:prometheus /opt/prometheus && \
     chown -R prometheus:prometheus /etc/prometheus && \
-    rpm -e --allmatches $(rpm -qa --qf "%{NAME}\n" | grep -v -E "bash|coreutils|filesystem|glibc$|libacl1|libattr1|libcap2|libgcc_s1|libgmp|libncurses|libpcre1|libreadline|libselinux|libstdc\+\+|openSUSE-release|system-user-root|terminfo-base|libpcre2") && \
+    rpm -e --allmatches $(rpm -qa --qf "%{NAME}\n" | grep -v -E "bash|coreutils|filesystem|glibc$|libacl1|libattr1|libcap2|libgcc_s1|libgmp|libncurses|libpcre|libreadline|libselinux|libstdc\+\+|openSUSE-release|system-user-root|terminfo-base") && \
     rm -Rf /etc/zypp && \
     rm -Rf /usr/lib/zypp* && \
     rm -Rf /var/{cache,log,run}/* && \
