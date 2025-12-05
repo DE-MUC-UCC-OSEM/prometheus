@@ -12,7 +12,7 @@ on:
         type: string
         required: true
         description: 'Prometheus release version'
-        default: '3.5.0'
+        default: '3.8.0'
 
 jobs:
   push_to_registry:
@@ -59,6 +59,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Scan Docker Image
+        if: ${{ success() }}
         env:
           IMAGE: ghcr.io/${{ github.repository }}:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
@@ -71,12 +72,27 @@ jobs:
           /tmp/mend image ${IMAGE,,} -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
         working-directory: /tmp
 
-      - name: Create a release
+      - name: Create release information
+        if: ${{ success() }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
           RELEASE_VERSION: ${{ github.event.inputs.release }}
         run: |
+          # Add step summary
+          {
+            echo "# Prometheus"
+            echo ""
+            echo "Running in an openSUSE Tumbleweed Image."
+            echo ""
+            echo "ghcr.io/de-muc-ucc-osem/prometheus:$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
+            echo ""
+            echo "### Included versions"
+            echo ""
+            echo "| Package Name              | Version         |"
+            echo "|---------------------------|-----------------|"
+            echo "| Prometheus | $COUPROMETHEUS_VERSIONCHDB_VERSION |"
+          } >> $GITHUB_STEP_SUMMARY
           echo -e "Prometheus build details\n- Prometheus: $PROMETHEUS_VERSION" > rn
           gh release create "$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
               --repo="$GITHUB_REPOSITORY" \
