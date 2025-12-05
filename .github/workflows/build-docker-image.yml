@@ -91,7 +91,7 @@ jobs:
             echo ""
             echo "| Package Name              | Version         |"
             echo "|---------------------------|-----------------|"
-            echo "| Prometheus | $COUPROMETHEUS_VERSIONCHDB_VERSION |"
+            echo "| Prometheus | $PROMETHEUS_VERSION |"
           } >> $GITHUB_STEP_SUMMARY
           echo -e "Prometheus build details\n- Prometheus: $PROMETHEUS_VERSION" > rn
           gh release create "$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
