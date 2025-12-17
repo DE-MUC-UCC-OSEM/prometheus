@@ -60,7 +60,7 @@ jobs:
       - name: Scan Docker Image
         if: ${{ success() }}
         env:
-          IMAGE: ghcr.io/${{ github.repository }}:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
           RELEASE_VERSION: ${{ github.event.inputs.release }}
           MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
