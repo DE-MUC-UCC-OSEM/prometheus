@@ -30,18 +30,17 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: artifactory.mitel.com
+          username: ${{ secrets.ARTIFACTORY_USER }}
+          password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus
           tags: |
             type=raw,value=${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
-            #type=raw,value=latest
       
       - name: Build and push Docker image
         id: push
@@ -68,9 +67,9 @@ jobs:
           MEND_URL: ${{ secrets.MEND_URL }}
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
         run: |
-          curl -L https://downloads.mend.io/cli/linux_amd64/mend -o /tmp/mend && chmod +x /tmp/mend && \
-          /tmp/mend image ${IMAGE,,} -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
-        working-directory: /tmp
+          rm -f ${{ github.workspace }}/mend
+          curl https://downloads.mend.io/cli/linux_amd64/mend -o ${{ github.workspace }}/mend && chmod +x ${{ github.workspace }}/mend
+          ${{ github.workspace }}/mend image ${IMAGE,,} -s "OpenScape UC Portfolio//OSEM third party applications//prometheus-osem-docker-image - $PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
 
       - name: Create release information
         if: ${{ success() }}
@@ -78,6 +77,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
           RELEASE_VERSION: ${{ github.event.inputs.release }}
+          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
         run: |
           # Add step summary
           {
@@ -85,7 +85,7 @@ jobs:
             echo ""
             echo "Running in an openSUSE Tumbleweed Image."
             echo ""
-            echo "ghcr.io/de-muc-ucc-osem/prometheus:$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed"
+            echo "${IMAGE}"
             echo ""
             echo "### Included versions"
             echo ""
@@ -93,8 +93,16 @@ jobs:
             echo "|---------------------------|-----------------|"
             echo "| Prometheus | $PROMETHEUS_VERSION |"
           } >> $GITHUB_STEP_SUMMARY
-          echo -e "Prometheus build details\n- Prometheus: $PROMETHEUS_VERSION" > rn
+          
+          cat > ${{ github.workspace }}/release-notes.md <<"EOF"
+          ## Prometheus release ${{ github.event.inputs.prometheus }}-${{ github.event.inputs.release }}
+          - **Prometheus version**: $PROMETHEUS_VERSION
+          ```
+          docker pull ${IMAGE}
+          ```
+
+          EOF
           gh release create "$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
               --repo="$GITHUB_REPOSITORY" \
               --title="$PROMETHEUS_VERSION-r$RELEASE_VERSION-tumbleweed" \
-              --notes-file rn
+              --notes-file release-notes.md
