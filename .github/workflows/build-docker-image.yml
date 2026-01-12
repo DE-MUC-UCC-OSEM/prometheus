@@ -94,7 +94,7 @@ jobs:
             echo "| Prometheus | $PROMETHEUS_VERSION |"
           } >> $GITHUB_STEP_SUMMARY
           
-          cat > ${{ github.workspace }}/release-notes.md <<"EOF"
+          cat > ${{ github.workspace }}/release-notes.md <<EOF
           ## Prometheus release ${{ github.event.inputs.prometheus }}-${{ github.event.inputs.release }}
           - **Prometheus version**: $PROMETHEUS_VERSION
           ```
