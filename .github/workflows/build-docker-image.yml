@@ -12,7 +12,7 @@ on:
         type: string
         required: true
         description: 'Prometheus release version'
-        default: '3.8.0'
+        default: '3.10.0'
 
 jobs:
   push_to_registry:
@@ -26,8 +26,15 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-      
-      - name: Log in to Docker Hub
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Artifactory Container Registry
         uses: docker/login-action@v3
         with:
           registry: artifactory.mitel.com
@@ -38,7 +45,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus
+          images: |
+            ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
       
