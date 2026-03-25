@@ -46,7 +46,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus
+            ${{ vars.ARTIFACTORY_IMG_URL_PUBLIC }}/prometheus
             ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
@@ -69,7 +69,7 @@ jobs:
       - name: Scan Docker Image
         if: ${{ success() }}
         env:
-          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL_PUBLIC }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
           RELEASE_VERSION: ${{ github.event.inputs.release }}
           MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
@@ -86,7 +86,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROMETHEUS_VERSION: ${{ github.event.inputs.prometheus }}
           RELEASE_VERSION: ${{ github.event.inputs.release }}
-          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
+          IMAGE: ${{ vars.ARTIFACTORY_IMG_URL_PUBLIC }}/prometheus:${{ github.event.inputs.prometheus }}-r${{ github.event.inputs.release }}-tumbleweed
         run: |
           # Add step summary
           {
